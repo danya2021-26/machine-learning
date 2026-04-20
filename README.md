@@ -1,1 +1,154 @@
-# machine-learning
+# machine-learning program 1
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import matplotlib.pyplot as plt
+Having a Quick Look into the Data
+# Loads data into Dataframe
+housing = pd.read_csv("housing.csv")
+# Having a quick look at the data
+display(housing)
+# Looking at the basic information such as about the data
+print(housing.info())
+# Looking at the statistics for the non-numeric values
+print(housing.ocean_proximity.value_counts())
+# Looking a the basic statistics about the data
+display(housing.describe())
+# Looking at the data distributions
+housing.hist(bins=50, figsize=(20,15))
+plt.show()
+Observations from the information, statistics and histograms:
+1. There are null values against attribute 'total_bedrooms'.
+2. 'median_income' is in different scale.
+3. 'house_median_age', 'median_income' and 'median_house_value' is capped to 50, 15
+and 500000, respectively.
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+19/02/2026, 15:18 Data_Preprocessing
+file:///C:/Users/panka/Downloads/Data_Preprocessing (1).html 1/5
+4. Attributes, in general, are in different scales.
+5. Histograms are tail-heavy
+Cleaning Data
+Removing duplicate observations
+# Checks for duplicate observations
+duplicate_count = sum(housing.duplicated())
+print("There are", duplicate_count, "duplicates in the datsset")
+# Deletes the duplicate data, if found
+if duplicate_count > 0:
+    housing.drop_duplicates(inplace=True)
+    print("\n\tDuplicate observations were deleted.")
+    # Prints the shape of data before removal of duplicate
+    print("\n\tData shape after duplicate removal:", housing.shape)
+Removing single-valued columns
+# Gets number of unique values for each column
+unique_values_per_attrib = housing.nunique()
+# Records columns to delete
+single_value_columns = [i for i, value_count in enumerate(unique_values_per_attr
+print("There are", len(single_value_columns), "single_valued columns in the dats
+# Deletes single-value columns, if exist
+if len(single_value_columns) > 0:
+    housing.drop(single_value_columns, axis=1, inplace=True)
+    print("\n\tSingle-valued columns were removed.")
+    # Prints the shape of data after removal of single-value columns
+    print("\n\tData shape after single-value column removal:", housing.shape)
+Creating Test Set
+# Creating test set using random sampling method to select observerations into 
+# train and test datasets.
+train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+Preparing Data
+# Seperates labels from features
+housing = train_set.drop("median_house_value", axis=1)
+housing_labels = train_set["median_house_value"].copy()
+Handling Missing Values
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+19/02/2026, 15:18 Data_Preprocessing
+file:///C:/Users/panka/Downloads/Data_Preprocessing (1).html 2/5
+Though the missing values are there only in attribute 'total_bedrooms', but all the
+numeric columns are made available to Imputer so that it can impute missing values in
+any attributes in testing dataset.
+# Instantiates imputer
+imputer = SimpleImputer(strategy="median")
+# Considers only numeric columns as the imputer works on numeric data
+housing_num = housing.drop("ocean_proximity", axis=1)
+# Fits and then Transforms the missing values in each column with learned median
+X_train_num = imputer.fit_transform(housing_num)
+Scaling Features
+As machine learning algorithms don't work well with (numerical) attributes having
+different scales, let's apply scaling transformations to numeric attributes using
+StandardScaler.
+# Instantiate standard scaler
+std_scaler = StandardScaler()
+# Fits and then Transforms to scale numeric attributes using standardization
+X_train_num = std_scaler.fit_transform(X_train_num)
+print("Shape of the transformed dataset with only numerical attributes is", 
+      X_train_num.shape)
+Encoding Categorical Attributes
+Encodes the only categorical attribute 'ocean_proximity' using One-Hot encoding
+# Instantiate encoder
+cat_encoder = OneHotEncoder(sparse=False)
+housing_cat = housing[["ocean_proximity"]]
+# Fits and then Transforms the categorical values into one-hot-encoded columns
+X_train_cat = cat_encoder.fit_transform(housing_cat)
+# Shows one-hot encoded information in densed array form
+print(X_train_cat)
+# Shows the ordered list of categories related to one-hot encoding
+print(cat_encoder.categories_)
+Now, instead of transforming numeric and non-numeric attributes idividually and then
+integrating back, transformation pipelines that can take care of tranforming both these
+different types of attributes in an integrated way can be used as shown below.
+Combining Transformed Data
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+19/02/2026, 15:18 Data_Preprocessing
+file:///C:/Users/panka/Downloads/Data_Preprocessing (1).html 3/5
+X_train = np.append(X_train_num, X_train_cat, axis=1)
+# Shows how X_train looks like
+display(
+    pd.DataFrame(
+        X_train, 
+        index=housing_num.index,
+        columns=list(housing_num.columns)+list(cat_encoder.categories_[0])
+    )
+)
+Transforming Test Data
+# Seperating test labels from test dataset before transformations
+# And, then dropping the labels from the test dataset
+housing_test = test_set.drop("median_house_value", axis=1)
+# Storing labels in a seperate series
+housing_test_labels = test_set["median_house_value"].copy()
+Handling Missing Values
+# Considers only numeric columns as the imputer works on numeric data
+housing_test_num = housing_test.drop("ocean_proximity", axis=1)
+# Transforms the missing values in each column with learned median
+X_test_num = imputer.transform(housing_test_num)
+Scaling Features
+# Transforms to scale numeric attributes using standardization
+X_test_num = std_scaler.transform(X_test_num)
+Encoding Categorical Attributes
+housing_test_cat = housing_test[["ocean_proximity"]]
+# Transforms the categorical values into one-hot-encoded columns
+X_test_cat = cat_encoder.transform(housing_test_cat)
+Combining Transformed Data
+X_test = np.append(X_test_num, X_test_cat, axis=1)
+# Shows how X_test looks like
+display(
+    pd.DataFrame(
+        X_test, 
+        index=housing_test_num.index,
+        columns=list(housing_test_num.columns)+list(cat_encoder.categories_[0])
+    )
+)
