@@ -1,0 +1,137 @@
+HOUSE PRICE PREDICTION USING DIFFERENT REGRESSION
+TECHNIQUES
+Predicts California home prices using diffent regression techniques such as closed-form linear regression and gradient descent.
+This experiment considers already preprocessed California datasets stored in .npy format. Both the datasets and relevant notebook
+*_data_preprocessing.ipynb can be found from the same repository location.
+# Imports required packages
+import numpy as np
+from sklearn.linear_model import LinearRegression, SGDRegressor
+from sklearn.metrics import root_mean_squared_error
+Retrieving Data
+# Loads datasets from previously processed .npy files
+with open("./housing_train_transformed.npy", "rb") as f:
+    X_train_transformed = np.load(f)
+with open("./housing_test_transformed.npy", "rb") as f:
+    X_test_transformed = np.load(f)
+# Seperates target from both the datasets
+y_train = X_train_transformed[:, -1]
+y_test = X_test_transformed[:, -1]
+X_train_transformed = X_train_transformed[:, :-1]
+X_test_transformed = X_test_transformed[:, :-1]
+In [ ]:
+In [ ]:
+In [ ]:
+26/03/2026, 12:58 P3_home_price_prediction_using_different_regression_techniques
+file:///C:/Users/panka/Downloads/P3_home_price_prediction_using_different_regression_techniques.html 1/5
+Closed-Form Approach
+Normal Equation [ ]
+# Estimates for model coefficents/parameters/weights (often denoted by θ)
+theta_ne = np.linalg.inv(X_train_transformed.T @ X_train_transformed) @ X_train_transformed.T @ y_train
+"""
+The same expression mentioined above can also be represented like the one below.
+theta = np.linalg.inv(
+    X_train_transformed.T.dot(X_train_transformed)).dot(
+        X_train_transformed.T).dot(X_train_target)
+"""
+# Shows θ values for normal equation (ne)
+print(theta_ne)
+[-53381.26179264 -54311.55719382  13122.77377485  -8357.34824316
+  26159.33889213 -50242.06829496  37563.32620216  73068.48598075
+ 218989.05888959 179302.88278282 457124.98025354 215307.83111698
+ 222688.15596118]
+# Performs predictions on both training and testing dataset by linearly combinining features
+predictions_train_ne = X_train_transformed.dot(theta_ne)
+predictions_test_ne = X_test_transformed.dot(theta_ne)
+# Evaluates Normal Equation model performance on both training and testing dataset
+rmse_train_ne = root_mean_squared_error(y_train, predictions_train_ne)
+rmse_test_ne = root_mean_squared_error(y_test, predictions_test_ne)
+print("Normal Equation-based Linear Regression Performance [RMSE]:\n{:.1f} [Train]\n{:.1f} [Test]".format(
+    rmse_train_ne, rmse_test_ne))
+^θ=(XTX)−1XTy
+In [ ]:
+In [ ]:
+In [ ]:
+26/03/2026, 12:58 P3_home_price_prediction_using_different_regression_techniques
+file:///C:/Users/panka/Downloads/P3_home_price_prediction_using_different_regression_techniques.html 2/5
+Normal Equation-based Linear Regression Performance [RMSE]:
+68232.8 [Train]
+71002.8 [Test]
+Singular Value Decomposition (SVD)
+# Initializes linear regression algorithm that implements SVD approach
+lin_reg = LinearRegression()
+# Fits the model
+lin_reg.fit(X_train_transformed, y_train)
+print("Linear Regression Model Parameters:\n")
+print("Intercept:", lin_reg.intercept_)
+print("Coefficients:", lin_reg.coef_)
+Linear Regression Model Parameters:
+Intercept: 258682.5818008228
+Coefficients: [-53381.26179264 -54311.55719382  13122.77377485  -8357.34824316
+  26159.33889213 -50242.06829496  37563.32620216  73068.48598075
+ -39693.52291123 -79379.699018   198442.39845272 -43374.75068384
+ -35994.42583964]
+# Performs predictions on both training and testing dataset
+predictions_train_lr = lin_reg.predict(X_train_transformed)
+predictions_test_lr = lin_reg.predict(X_test_transformed)
+# Evaluates Normal Equation model performance on both training and testing dataset
+rmse_train_lr = root_mean_squared_error(y_train, predictions_train_lr)
+rmse_test_lr = root_mean_squared_error(y_test, predictions_test_lr)
+In [ ]:
+▾ ? i  LinearRegression
+LinearRegression()
+In [ ]:
+In [ ]:
+In [ ]:
+26/03/2026, 12:58 P3_home_price_prediction_using_different_regression_techniques
+file:///C:/Users/panka/Downloads/P3_home_price_prediction_using_different_regression_techniques.html 3/5
+26/03/2026, 12:58
+P3_home_price_prediction_using_different_regression_techniques
+print("SVD-based Linear Regression Performance [RMSE]:\n{:.1f} [Train]\n{:.1f} [Test]".format(
+rmse_train_lr, rmse_test_lr))
+SVD-based Linear Regression Performance [RMSE]:
+68232.8 [Train]
+71002.8 [Test]
+Gradient Descent-based Iterative Optimization Approach
+In [ ]:
+# Initializes SGD classifier
+sgd_reg = SGDRegressor(
+penalty=None,           
+tol=1e-5,               
+max_iter=1000,          
+eta0=0.01,              
+n_iter_no_change=100,   
+random_state=42)
+# No regularization
+# Tolerance for loss drop during last 'n_iter_no_change' number of epocs
+# Maximum number of traning iterations (epochs)
+# Learning rate
+# Exits if training loss doesn't improve by 'tol' for this many epochs
+# Fits the model
+sgd_reg.fit(X_train_transformed, y_train)
+▾
+SGDRegressor
+SGDRegressor(n_iter_no_change=100, penalty=None, random_state=42, tol=1e-05)
+In [ ]:
+# Prints SGD model parameters
+i
+print("SGD Model Parameters:\n")
+print("Intercept:", sgd_reg.intercept_)
+print("Coefficients:", sgd_reg.coef_)
+SGD Model Parameters:
+Intercept: [178748.92103879]
+Coefficients: [-53080.59288081 -55064.34555508  13006.44744967  -8439.05055623
+26055.39869498 -50501.96794798  37126.91852779  72906.65683759
+40868.78471157    941.18285415  56058.96402653  36711.0864693
+44168.90297721]
+?
+4/5
+file:///C:/Users/panka/Downloads/P3_home_price_prediction_using_different_regression_techniques.html
+# Performs predictions on both training and testing dataset
+predictions_train_sgd = sgd_reg.predict(X_train_transformed)
+predictions_test_sgd = sgd_reg.predict(X_test_transformed)
+# Evaluates SGD regression performance on both training and testing dataset
+rmse_train_sgd = root_mean_squared_error(y_train, predictions_train_sgd)
+rmse_test_sgd = root_mean_squared_error(y_test, predictions_test_sgd)
+print("SGD Regression Performance [RMSE]:\n{:.1f} [Train]\n{:.1f} [Test]".format(
+    rmse_train_sgd, rmse_test_sgd))
+SGD Regression Performance [RMSE]
