@@ -1,0 +1,85 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+Retrieving & Analyzing the Data
+# Loads and displays the data
+life_sat_index = pd.read_csv("./../data/lifesat.csv")
+display(life_sat_index)
+# Prepares and visualizes the data
+X = life_sat_index[["GDP per capita (USD)"]].values
+y = life_sat_index[["Life satisfaction"]].values
+life_sat_index.plot(kind='scatter', x="GDP per capita (USD)", y="Life satisfaction")
+plt.axis([23500, 62500, 4, 9])
+plt.show()
+Modeling
+Model-based Approach
+In [ ]:
+In [ ]:
+In [ ]:
+25/02/2026, 14:45 1.1_life_satisfaction_index_prediction
+file:///C:/Users/panka/Downloads/1.1_life_satisfaction_index_prediction (1).html 1/4
+Considers a simple linear model with equation
+where  and  represent intersect and slope, respetively.
+# Initializes a simple linear model
+lin_reg = LinearRegression()
+# Fits the linear model
+lin_reg.fit(X, y)
+# Prints parameters of the trained linear model
+print("Intercept:", lin_reg.intercept_, ", Slope:", lin_reg.coef_)
+print("\nFormated Output: Intercept: {0:.2f}, Slope: {1:.2e}".format(lin_reg.intercept_[0], lin_reg.coef_[0][0]))
+# Visualizes the fitted linear model
+# First, plots all the data points
+life_sat_index.plot(kind='scatter', x="GDP per capita (USD)", y="Life satisfaction")
+plt.axis([23500, 62500, 4, 9])
+# Extracts slope and intercept
+m = lin_reg.coef_[0][0]
+c = lin_reg.intercept_[0]
+# Plots the line directly with slope and intersect
+plt.axline(xy1=(0, c), slope=m, color="blue", label=f'$y={m}x {c:+}$')
+# Shows the linear model equation by enabling legend
+plt.legend()
+# Finally, renders the plot
+plt.draw()
+life_sat_index=θ0+θ1∗GDP_per_capita
+θ0 θ1
+In [ ]:
+In [ ]:
+In [ ]:
+25/02/2026, 14:45 1.1_life_satisfaction_index_prediction
+file:///C:/Users/panka/Downloads/1.1_life_satisfaction_index_prediction (1).html 2/4
+# Now, makes a prediction for life satisfaction index for country Cyprus using trained linear model
+X_test = [[37_655.2]]  # Consider it as Cyprus' GDP per capita in 2020
+y_predictions = lin_reg.predict(X_test)
+# Prints the predictions
+print(y_predictions)
+# Visualizes the prediction to check if it falls on the trained straight line
+# Once again, plots all the data points and then the line for linear model
+life_sat_index.plot(kind='scatter', x="GDP per capita (USD)", y="Life satisfaction")
+plt.axis([23500, 62500, 4, 9])
+plt.axline(xy1=(0, c), slope=m, color="blue", label=f'$y={m}x {c:+}$')
+# Now, plots the predictions
+plt.scatter(
+    X_test,
+    y_predictions,
+    c=np.array(["red"])
+)
+plt.show()
+Instance-based Modeling Approach
+# Initializes k-nearest neighbors regression algorithm,
+knn_reg = KNeighborsRegressor(n_neighbors = 3)
+# and fits the model
+knn_reg.fit(X, y)
+In [ ]:
+In [ ]:
+In [ ]:
+25/02/2026, 14:45 1.1_life_satisfaction_index_prediction
+file:///C:/Users/panka/Downloads/1.1_life_satisfaction_index_prediction (1).html 3/4
+25/02/2026, 14:45
+1.1_life_satisfaction_index_prediction
+In [ ]:
+# Now, makes a prediction for life satisfaction index for the same country using instance-based model
+y_predictions = knn_reg.predict(X_test)
+# Prints the predictions
+print(y_predictions)
