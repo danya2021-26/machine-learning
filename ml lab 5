@@ -1,0 +1,127 @@
+Wine Class Prediction
+Predicts wine class using Linear and Kernelized Support Vector Machine
+# Imports required modules and methods
+import pandas as pd
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split, cross_val_score, RandomizedSearchCV
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC, SVC
+from scipy.stats import loguniform, uniform
+Retrieving & Analyzing the Data
+# Loads the wine dataset
+wine = load_wine(return_X_y=False, as_frame=True)
+# Checks the bunch objects available throgh keys
+print(wine.keys())
+# Displays few instances from the dataset
+display(wine.data)
+# Displays few instances from the dataset
+display(wine.target)
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+02/04/2026, 11:42 P5_wine_class_prediction_using_svm
+file:///C:/Users/panka/Downloads/P5_wine_class_prediction_using_svm (1).html 1/5
+# Checks wine class distribution
+wine.target.value_counts()
+# Displays few instances from the dataset
+display(wine.target_names)
+# Checks for the basic information about the dataset
+wine.data.info()
+All 13 features were found to be numerical with no missing values in any of the features
+# Checks for basic statistics of the dataset
+wine.data.describe().transpose()
+Data Preparation
+Splitting Data
+Splits the data into train and test set for performing model performance evaluation.
+# Splits the data into train and test set with stratification on wine class
+X_train, X_test, y_train, y_test = train_test_split(
+    wine.data, wine.target, test_size=0.2, random_state=42, stratify=wine.target)
+print("Train set shape:", X_train.shape)
+print("Test set shape:", X_test.shape)
+# Ensure class distribution is nearly equal in train and test set
+pd.DataFrame({
+    "Train set": y_train.value_counts()/y_train.size,
+    "Test set": y_test.value_counts()/y_test.size
+    })
+Transforming Data
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+02/04/2026, 11:42 P5_wine_class_prediction_using_svm
+file:///C:/Users/panka/Downloads/P5_wine_class_prediction_using_svm (1).html 2/5
+Standardize the data as the features are of different scales.
+# Inializes the standard scaler
+std_scaler = StandardScaler()
+# Fits the standard scaler on train set
+std_scaler.fit(X_train)
+# Transforms the train set
+X_train_transformed = std_scaler.transform(X_train)
+# Fitted standard scaler is used tranform test set
+X_test_transformed = std_scaler.transform(X_test)
+Modeling
+Linear SVC
+# Initializes the linear support vector classifier
+lin_svc = LinearSVC(random_state=42)
+# Fits the model on train set
+lin_svc.fit(X_train_transformed, y_train)
+# Checks prediction performance over cross validation
+lin_svc_cv = cross_val_score(LinearSVC(random_state=42), X_train_transformed, y_train)
+print("Linear SVC CV Score: {:.3f}".format(lin_svc_cv.mean()))
+# Checks the prediction performance on the test set
+lin_svc_test_predictions = lin_svc.predict(X_test_transformed)
+print("Linear SVC Test Score: {:.3f}".format(accuracy_score(y_test, lin_svc_test_predictions)))
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+02/04/2026, 11:42 P5_wine_class_prediction_using_svm
+file:///C:/Users/panka/Downloads/P5_wine_class_prediction_using_svm (1).html 3/5
+Kernelized SVM
+# Initializes kernelized SVC with default parameters
+svm_clf = SVC(random_state=42)
+# Fits the model on train set
+svm_clf.fit(X_train_transformed, y_train)
+# Performs prediction on the train set and checks performance
+svm_clf_train_predictions = svm_clf.predict(X_train_transformed)
+print("SVM Classifier Train Score: {:.3f}".format(accuracy_score(y_train, svm_clf_train_predictions)))
+# Checks overall prediction performance over cross validation
+svm_clf_cv = cross_val_score(SVC(random_state=42), X_train_transformed, y_train)
+print("SVM Classifier CV Score: {:.3f}".format(svm_clf_cv.mean()))
+# Prints the parameters for trained SVM classifier
+svm_clf.get_params()
+If the model performs well below the expectation, then important hyperparamters C and gamma can be fine-tuned using appropriate search
+methods like the one below.
+# Sets the distribution for the hyperparameters
+param_distributions = {
+    "gamma": loguniform(0.001, 0.1),
+    "C": uniform(1, 10)
+}
+# Performs random search for the best values for the mentioned parameters
+rnd_search_cv = RandomizedSearchCV(SVC(random_state=42), param_distributions, n_iter=100, cv=5, random_state=42)
+rnd_search_cv.fit(X_train_transformed, y_train)
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+In [ ]:
+02/04/2026, 11:42 P5_wine_class_prediction_using_svm
+file:///C:/Users/panka/Downloads/P5_wine_class_prediction_using_svm (1).html 4/5
+02/04/2026, 11:42
+P5_wine_class_prediction_using_svm
+In [ ]:
+In [ ]:
+In [ ]:
+# Checks for the best CV score achieved
+rnd_search_cv.best_score_
+This CV performance of the tuned SVM classifier was observed to be litte better than that of the default SVM classifier.
+# Prints the best value found the parameters of interest ['C' and 'gamma']
+rnd_search_cv.best_estimator_.get_params()
+# Checks the best estimator's prediction performance on the test set
+accuracy_score(y_test, rnd_search_cv.best_estimator_.predict(X_test_transformed))
+In overall, kernelized support vector classifier performed better than linear supoort vector classifier in this experiment
